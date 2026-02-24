@@ -37,5 +37,55 @@ func TestCountWords(t *testing.T) {
 			}
 		})
 	}
+}
 
+func TestCountLines(t *testing.T) {
+	type testCase struct {
+		name  string
+		input string
+		wants int
+	}
+
+	testCases := []testCase{
+		{
+			name:  "Simple five words, 1 new lines",
+			input: "one two three four five\n",
+			wants: 1,
+		},
+		{
+			name:  "empty file",
+			input: "",
+			wants: 0,
+		},
+		{
+			name:  "no new lines",
+			input: "one two three four five",
+			wants: 0,
+		},
+		{
+			name:  "no new lines at end",
+			input: "one two three four five\nsix",
+			wants: 1,
+		},
+		{
+			name:  "multi newline string",
+			input: "\n\n\n\n",
+			wants: 4,
+		},
+		{
+			name:  "multi word line string",
+			input: "one\ntwo\nthree\nfour\nfive\n",
+			wants: 5,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			r := strings.NewReader(tc.input)
+			results := counter.CountLines(r)
+			if results != tc.wants {
+				t.Errorf("countLines(%q) = %d, want %d", tc.input, results, tc.wants)
+			}
+		})
+	}
 }

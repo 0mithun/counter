@@ -1,9 +1,7 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
-	"io"
 	"os"
 )
 
@@ -42,40 +40,4 @@ func main() {
 	if didError {
 		os.Exit(1)
 	}
-}
-
-func CountWordsInFile(filename string) (int, error) {
-	file, err := os.Open(filename)
-
-	if err != nil {
-		return 0, err
-	}
-	defer file.Close()
-
-	return CountWords(file), nil
-}
-
-func CountWordsInReader(file io.Reader) int {
-	wordCount := 0
-
-	scanner := bufio.NewScanner(file)
-	scanner.Split(bufio.ScanWords)
-	for scanner.Scan() {
-		wordCount++
-		//wordCount += CountWords(scanner.Bytes())
-	}
-
-	return wordCount
-}
-
-func CountWords(r io.Reader) int {
-	wordCount := 0
-
-	scanner := bufio.NewScanner(r)
-	scanner.Split(bufio.ScanWords)
-	for scanner.Scan() {
-		wordCount++
-	}
-
-	return wordCount
 }
