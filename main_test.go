@@ -1,6 +1,7 @@
 package main_test
 
 import (
+	"strings"
 	"testing"
 
 	counter "github.com/0mithun/counter"
@@ -28,7 +29,9 @@ func TestCountWords(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			results := counter.CountWords([]byte(tc.input))
+			r := strings.NewReader(tc.input)
+
+			results := counter.CountWords(r)
 			if results != tc.wants {
 				t.Errorf("countWords(%q) = %d, want %d", tc.input, results, tc.wants)
 			}
