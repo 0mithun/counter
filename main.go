@@ -4,15 +4,14 @@ import (
 	"bufio"
 	"fmt"
 	"io"
-	"log"
 	"os"
 )
 
 func main() {
 	//filename := "words.txt"
-	if len(os.Args) < 2 {
-		log.Fatalln("error: no filename provided")
-	}
+	//if len(os.Args) < 2 {
+	//	log.Fatalln("error: no filename provided")
+	//}
 	//filename := os.Args[1]
 
 	total := 0
@@ -28,6 +27,13 @@ func main() {
 		fmt.Println(wordCount, filename)
 		total += wordCount
 	}
+
+	if len(filenames) == 0 {
+		total = CountWords(os.Stdin)
+		fmt.Println(total)
+		return
+	}
+
 	if len(filenames) > 1 {
 		fmt.Println(total, "total")
 	}
