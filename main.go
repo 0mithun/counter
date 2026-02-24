@@ -22,17 +22,13 @@ func main() {
 			fmt.Fprintln(os.Stderr, "counter:", err)
 			continue
 		}
-		totals = Counts{
-			Lines: totals.Lines + counts.Lines,
-			Words: totals.Words + counts.Words,
-			Bytes: totals.Bytes + counts.Bytes,
-		}
+		totals = totals.Add(counts)
 
 		counts.Print(os.Stdout, filename)
 	}
 
 	if len(filenames) == 0 {
-		GetCounts(os.Stdin).Print(os.Stdout, "")
+		GetCounts(os.Stdin).Print(os.Stdout)
 	}
 
 	if len(filenames) > 1 {
