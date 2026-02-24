@@ -12,7 +12,7 @@ func main() {
 	//}
 	//filename := os.Args[1]
 
-	total := 0
+	totals := Counts{}
 	filenames := os.Args[1:]
 	didError := false
 	for _, filename := range filenames {
@@ -22,22 +22,23 @@ func main() {
 			fmt.Fprintln(os.Stderr, "counter:", err)
 			continue
 		}
-		total += counts.Words
-		fmt.Println(counts.Lines, counts.Words, counts.Bytes, filename)
+		totals = Counts{
+			Lines: totals.Lines + counts.Lines,
+			Words: totals.Words + counts.Words,
+			Bytes: totals.Bytes + counts.Bytes,
+		}
+
+		counts.Print(os.Stdout, filename)
 	}
 
 	if len(filenames) == 0 {
-		counts := GetCounts(os.Stdin)
-
-		fmt.Println(counts.Lines, counts.Words, counts.Bytes)
-		return
+		GetCounts(os.Stdin).Print(os.Stdout, "")
 	}
 
 	if len(filenames) > 1 {
-		fmt.Println(total, "total")
+		totals.Print(os.Stdout, "totals")
 	}
 
-	fmt.Println(total)
 	if didError {
 		os.Exit(1)
 	}
