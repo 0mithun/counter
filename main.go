@@ -10,29 +10,43 @@ import (
 
 func main() {
 	//filename := "words.txt"
+	if len(os.Args) < 2 {
+		log.Fatalln("error: no filename provided")
+	}
+	//filename := os.Args[1]
 
-	filename := "big.txt"
-	//now := time.Now()
+	total := 0
+	filenames := os.Args[1:]
+	didError := false
+	for _, filename := range filenames {
+		wordCount, err := CountWordsInFile(filename)
+		if err != nil {
+			didError = true
+			fmt.Fprintln(os.Stderr, "counter:", err)
+			continue
+		}
+		fmt.Println(wordCount, filename)
+		total += wordCount
+	}
+	if len(filenames) > 1 {
+		fmt.Println(total, "total")
+	}
+
+	fmt.Println(total)
+	if didError {
+		os.Exit(1)
+	}
+}
+
+func CountWordsInFile(filename string) (int, error) {
 	file, err := os.Open(filename)
 
 	if err != nil {
-		log.Fatalln("failed to read file:", err)
+		return 0, err
 	}
 	defer file.Close()
 
-	//scanner := bufio.NewScanner(file)
-	//for scanner.Scan() {
-	//	data := []byte(scanner.Bytes())
-	//	wordCount := CountWords(data)
-	//
-	//	fmt.Println(wordCount)
-	//}
-
-	//data, err := io.ReadAll(file)
-
-	wordCount := CountWords(file)
-
-	fmt.Println(wordCount)
+	return CountWords(file), nil
 }
 
 func CountWordsInReader(file io.Reader) int {
