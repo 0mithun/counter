@@ -11,15 +11,17 @@ import (
 )
 
 func main() {
-	opts := display.Options{}
+	args := display.NewOptionsArgs{}
 
-	flag.BoolVar(&opts.ShowWords, "w", false, "Used to toggle whether or not to show the word count")
-	flag.BoolVar(&opts.ShowBytes, "b", false, "Used to toggle whether or not to show the byte count")
-	flag.BoolVar(&opts.ShowLines, "l", false, "Used to toggle whether or not to show the line count")
+	flag.BoolVar(&args.ShowWords, "w", false, "Used to toggle whether or not to show the word count")
+	flag.BoolVar(&args.ShowBytes, "b", false, "Used to toggle whether or not to show the byte count")
+	flag.BoolVar(&args.ShowLines, "l", false, "Used to toggle whether or not to show the line count")
 
-	flag.BoolVar(&display.ShowHeader, "header", false, "Used to toggle whether or not to show the header")
+	//flag.BoolVar(&display.ShowHeader, "header", false, "Used to toggle whether or not to show the header")
 
 	flag.Parse()
+
+	opts := display.NewOptions(args)
 
 	wr := tabwriter.NewWriter(os.Stdout, 0, 8, 1, ' ', tabwriter.AlignRight)
 

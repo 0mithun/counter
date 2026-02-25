@@ -153,7 +153,7 @@ func TestGetCount(t *testing.T) {
 func TestPrintCounts(t *testing.T) {
 	type inputs struct {
 		counts   counter.Counts
-		opts     display.Options
+		opts     display.NewOptionsArgs
 		filename []string
 	}
 
@@ -169,7 +169,7 @@ func TestPrintCounts(t *testing.T) {
 			input: inputs{
 				counts:   counter.Counts{Lines: 1, Words: 5, Bytes: 24},
 				filename: []string{"words.txt"},
-				opts: display.Options{
+				opts: display.NewOptionsArgs{
 					ShowLines: true,
 					ShowWords: true,
 					ShowBytes: true,
@@ -182,7 +182,7 @@ func TestPrintCounts(t *testing.T) {
 			input: inputs{
 				counts:   counter.Counts{Lines: 1, Words: 5, Bytes: 24},
 				filename: []string{"words.txt"},
-				opts: display.Options{
+				opts: display.NewOptionsArgs{
 					ShowLines: true,
 					ShowWords: false,
 					ShowBytes: false,
@@ -195,7 +195,7 @@ func TestPrintCounts(t *testing.T) {
 			input: inputs{
 				counts:   counter.Counts{Lines: 1, Words: 5, Bytes: 24},
 				filename: []string{"words.txt"},
-				opts: display.Options{
+				opts: display.NewOptionsArgs{
 					ShowLines: false,
 					ShowWords: true,
 					ShowBytes: false,
@@ -208,7 +208,7 @@ func TestPrintCounts(t *testing.T) {
 			input: inputs{
 				counts:   counter.Counts{Lines: 1, Words: 5, Bytes: 24},
 				filename: []string{"words.txt"},
-				opts: display.Options{
+				opts: display.NewOptionsArgs{
 					ShowLines: false,
 					ShowWords: false,
 					ShowBytes: true,
@@ -221,7 +221,7 @@ func TestPrintCounts(t *testing.T) {
 			input: inputs{
 				counts:   counter.Counts{Lines: 1, Words: 5, Bytes: 24},
 				filename: []string{"words.txt"},
-				opts: display.Options{
+				opts: display.NewOptionsArgs{
 					ShowLines: true,
 					ShowWords: false,
 					ShowBytes: true,
@@ -241,7 +241,7 @@ func TestPrintCounts(t *testing.T) {
 			name: "empty filename",
 			input: inputs{
 				counts: counter.Counts{Lines: 1, Words: 4, Bytes: 20},
-				opts: display.Options{
+				opts: display.NewOptionsArgs{
 					ShowLines: true,
 					ShowWords: true,
 					ShowBytes: true,
@@ -254,7 +254,7 @@ func TestPrintCounts(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			buffer := bytes.Buffer{}
-			tc.input.counts.Print(&buffer, tc.input.opts, tc.input.filename...)
+			tc.input.counts.Print(&buffer, display.NewOptions(tc.input.opts), tc.input.filename...)
 			if got := buffer.String(); got != tc.wants {
 				t.Errorf("PrintCounts(%q) = %q, want %q", tc.input.filename, got, tc.wants)
 			}
