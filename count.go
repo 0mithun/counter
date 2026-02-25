@@ -1,4 +1,4 @@
-package main
+package counter
 
 import (
 	"bufio"
@@ -8,6 +8,8 @@ import (
 	"strconv"
 	"strings"
 	"unicode"
+
+	"github.com/0mithun/counter/display"
 )
 
 type Counts struct {
@@ -26,33 +28,52 @@ func (c Counts) Add(other Counts) Counts {
 	return c
 }
 
-func (c Counts) Print(w io.Writer, opts DisplayOptions, suffix ...string) {
+func (c Counts) Print(w io.Writer, opts display.Options, suffix ...string) {
 	//fmt.Fprintln(w, c.Lines, c.Words, c.Bytes, filename)
-	xs := []string{}
+	stats := []string{}
 
 	if opts.ShouldShowLines() {
-		xs = append(xs, strconv.Itoa(c.Lines))
+		stats = append(stats, strconv.Itoa(c.Lines))
 	}
 
 	if opts.ShouldShowWords() {
-		xs = append(xs, strconv.Itoa(c.Words))
+		stats = append(stats, strconv.Itoa(c.Words))
 	}
 
 	if opts.ShouldShowBytes() {
-		xs = append(xs, strconv.Itoa(c.Bytes))
+		stats = append(stats, strconv.Itoa(c.Bytes))
 	}
 
-	xs = append(xs, suffix...)
+	line := strings.Join(stats, "\t") + "\t"
+	fmt.Fprint(w, line)
 
-	line := strings.Join(xs, " ")
+	suffixStr := strings.Join(suffix, " ")
+	if suffixStr != "" {
+		fmt.Fprintf(w, " %s", suffixStr)
+	}
+	fmt.Fprint(w, "\n")
+}
+
+func (c Counts) PrintHeader(w io.Writer, showHeader bool, opts display.Options) {
+	if !showHeader {
+		return
+	}
+	stats := []string{}
+
+	if opts.ShouldShowLines() {
+		stats = append(stats, "lines")
+	}
+
+	if opts.ShouldShowWords() {
+		stats = append(stats, "words")
+	}
+
+	if opts.ShouldShowBytes() {
+		stats = append(stats, "bytes")
+	}
+
+	line := strings.Join(stats, "\t") + "\t"
 	fmt.Fprintln(w, line)
-
-	//fmt.Fprintf(w, "%d %d %d", c.Lines, c.Words, c.Bytes)
-	//
-	//for _, filename := range suffix {
-	//	fmt.Fprintf(w, " %s", filename)
-	//}
-
 }
 
 func GetCounts(f io.Reader) Counts {

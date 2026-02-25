@@ -1,11 +1,12 @@
-package main_test
+package counter_test
 
 import (
 	"bytes"
 	"strings"
 	"testing"
 
-	counter "github.com/0mithun/counter"
+	"github.com/0mithun/counter"
+	"github.com/0mithun/counter/display"
 )
 
 func TestCountWords(t *testing.T) {
@@ -152,7 +153,7 @@ func TestGetCount(t *testing.T) {
 func TestPrintCounts(t *testing.T) {
 	type inputs struct {
 		counts   counter.Counts
-		opts     counter.DisplayOptions
+		opts     display.Options
 		filename []string
 	}
 
@@ -168,65 +169,65 @@ func TestPrintCounts(t *testing.T) {
 			input: inputs{
 				counts:   counter.Counts{Lines: 1, Words: 5, Bytes: 24},
 				filename: []string{"words.txt"},
-				opts: counter.DisplayOptions{
+				opts: display.Options{
 					ShowLines: true,
 					ShowWords: true,
 					ShowBytes: true,
 				},
 			},
-			wants: "1 5 24 words.txt\n",
+			wants: "1\t5\t24\t words.txt\n",
 		},
 		{
 			name: "simple five words.txt show lines",
 			input: inputs{
 				counts:   counter.Counts{Lines: 1, Words: 5, Bytes: 24},
 				filename: []string{"words.txt"},
-				opts: counter.DisplayOptions{
+				opts: display.Options{
 					ShowLines: true,
 					ShowWords: false,
 					ShowBytes: false,
 				},
 			},
-			wants: "1 words.txt\n",
+			wants: "1\t words.txt\n",
 		},
 		{
 			name: "simple five words.txt show words",
 			input: inputs{
 				counts:   counter.Counts{Lines: 1, Words: 5, Bytes: 24},
 				filename: []string{"words.txt"},
-				opts: counter.DisplayOptions{
+				opts: display.Options{
 					ShowLines: false,
 					ShowWords: true,
 					ShowBytes: false,
 				},
 			},
-			wants: "5 words.txt\n",
+			wants: "5\t words.txt\n",
 		},
 		{
 			name: "simple five words.txt show bytes",
 			input: inputs{
 				counts:   counter.Counts{Lines: 1, Words: 5, Bytes: 24},
 				filename: []string{"words.txt"},
-				opts: counter.DisplayOptions{
+				opts: display.Options{
 					ShowLines: false,
 					ShowWords: false,
 					ShowBytes: true,
 				},
 			},
-			wants: "24 words.txt\n",
+			wants: "24\t words.txt\n",
 		},
 		{
 			name: "simple five words.txt show bytes and lines",
 			input: inputs{
 				counts:   counter.Counts{Lines: 1, Words: 5, Bytes: 24},
 				filename: []string{"words.txt"},
-				opts: counter.DisplayOptions{
+				opts: display.Options{
 					ShowLines: true,
 					ShowWords: false,
 					ShowBytes: true,
 				},
 			},
-			wants: "1 24 words.txt\n",
+			wants: "1\t24\t words.txt\n",
 		},
 		{
 			name: "simple five words.txt no options",
@@ -234,19 +235,19 @@ func TestPrintCounts(t *testing.T) {
 				counts:   counter.Counts{Lines: 1, Words: 5, Bytes: 24},
 				filename: []string{"words.txt"},
 			},
-			wants: "1 5 24 words.txt\n",
+			wants: "1\t5\t24\t words.txt\n",
 		},
 		{
 			name: "empty filename",
 			input: inputs{
 				counts: counter.Counts{Lines: 1, Words: 4, Bytes: 20},
-				opts: counter.DisplayOptions{
+				opts: display.Options{
 					ShowLines: true,
 					ShowWords: true,
 					ShowBytes: true,
 				},
 			},
-			wants: "1 4 20\n",
+			wants: "1\t4\t20\t\n",
 		},
 	}
 
