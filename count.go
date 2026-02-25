@@ -13,35 +13,35 @@ import (
 )
 
 type Counts struct {
-	Bytes int
-	Words int
-	Lines int
+	bytes int
+	words int
+	lines int
 }
 
 // Add will modify the values of the count by
 // adding the values from the other.
 func (c Counts) Add(other Counts) Counts {
-	c.Bytes += other.Bytes
-	c.Words += other.Words
-	c.Lines += other.Lines
+	c.bytes += other.bytes
+	c.words += other.words
+	c.lines += other.lines
 
 	return c
 }
 
 func (c Counts) Print(w io.Writer, opts display.Options, suffix ...string) {
-	//fmt.Fprintln(w, c.Lines, c.Words, c.Bytes, filename)
+	//fmt.Fprintln(w, c.lines, c.words, c.bytes, filename)
 	stats := []string{}
 
 	if opts.ShouldShowLines() {
-		stats = append(stats, strconv.Itoa(c.Lines))
+		stats = append(stats, strconv.Itoa(c.lines))
 	}
 
 	if opts.ShouldShowWords() {
-		stats = append(stats, strconv.Itoa(c.Words))
+		stats = append(stats, strconv.Itoa(c.words))
 	}
 
 	if opts.ShouldShowBytes() {
-		stats = append(stats, strconv.Itoa(c.Bytes))
+		stats = append(stats, strconv.Itoa(c.bytes))
 	}
 
 	line := strings.Join(stats, "\t") + "\t"
@@ -88,9 +88,9 @@ func GetCounts(f io.Reader) Counts {
 	//f.Seek(offsetStart, io.SeekStart)
 	//
 	//return Counts{
-	//	Lines: lines,
-	//	Words: words,
-	//	Bytes: bytes,
+	//	lines: lines,
+	//	words: words,
+	//	bytes: bytes,
 	//}
 
 	res := Counts{}
@@ -104,16 +104,16 @@ func GetCounts(f io.Reader) Counts {
 		if err != nil {
 			break
 		}
-		res.Bytes += size
+		res.bytes += size
 
 		if r == '\n' {
-			res.Lines++
+			res.lines++
 		}
 
 		isSpace := unicode.IsSpace(r)
 
 		if !isSpace && !isInsideWord {
-			res.Words++
+			res.words++
 		}
 
 		isInsideWord = !isSpace
