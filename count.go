@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strconv"
+	"strings"
 )
 
 type Counts struct {
@@ -23,15 +25,33 @@ func (c Counts) Add(other Counts) Counts {
 	return c
 }
 
-func (c Counts) Print(w io.Writer, filenames ...string) {
+func (c Counts) Print(w io.Writer, opts DisplayOptions, suffix ...string) {
 	//fmt.Fprintln(w, c.Lines, c.Words, c.Bytes, filename)
-	fmt.Fprintf(w, "%d %d %d", c.Lines, c.Words, c.Bytes)
+	xs := []string{}
 
-	for _, filename := range filenames {
-		fmt.Fprintf(w, " %s", filename)
+	if opts.ShouldShowLines() {
+		xs = append(xs, strconv.Itoa(c.Lines))
 	}
 
-	fmt.Fprintf(w, "\n")
+	if opts.ShouldShowWords() {
+		xs = append(xs, strconv.Itoa(c.Words))
+	}
+
+	if opts.ShouldShowBytes() {
+		xs = append(xs, strconv.Itoa(c.Bytes))
+	}
+
+	xs = append(xs, suffix...)
+
+	line := strings.Join(xs, " ")
+	fmt.Fprintln(w, line)
+
+	//fmt.Fprintf(w, "%d %d %d", c.Lines, c.Words, c.Bytes)
+	//
+	//for _, filename := range suffix {
+	//	fmt.Fprintf(w, " %s", filename)
+	//}
+
 }
 
 func GetCounts(f io.ReadSeeker) Counts {
