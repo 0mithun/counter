@@ -2,11 +2,13 @@ package counter
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
 	"io"
 	"os"
 	"strconv"
 	"strings"
+	"sync"
 	"unicode"
 
 	"github.com/0mithun/counter/display"
@@ -16,6 +18,12 @@ type Counts struct {
 	bytes int
 	words int
 	lines int
+}
+
+type FileCountsResult struct {
+	Counts   Counts
+	Filename string
+	Err      error
 }
 
 // Add will modify the values of the count by
@@ -76,7 +84,137 @@ func (c Counts) PrintHeader(w io.Writer, showHeader bool, opts display.Options) 
 	fmt.Fprintln(w, line)
 }
 
-func GetCounts(f io.Reader) Counts {
+func CountFiles(filenames []string) <-chan FileCountsResult {
+	ch := make(chan FileCountsResult)
+
+	wg := sync.WaitGroup{}
+	wg.Add(len(filenames))
+
+	for _, filename := range filenames {
+		go func() {
+			defer wg.Done()
+			res, err := CountFile(filename)
+
+			ch <- FileCountsResult{
+				Counts:   res,
+				Filename: filename,
+				Err:      err,
+			}
+		}()
+	}
+
+	go func() {
+		wg.Wait()
+		close(ch)
+	}()
+
+	return ch
+}
+
+func GetCounts(r io.Reader) Counts {
+	bytesReader, bytesWriter := io.Pipe()
+	wordsReader, wordsWriter := io.Pipe()
+	linesReader, linesWriter := io.Pipe()
+
+	w := io.MultiWriter(bytesWriter, wordsWriter, linesWriter)
+
+	chBytes := make(chan int)
+	chWords := make(chan int)
+	chLines := make(chan int)
+
+	go func() {
+		defer close(chBytes)
+		chBytes <- CountBytes(bytesReader)
+	}()
+
+	go func() {
+		defer close(chWords)
+		chWords <- CountWords(wordsReader)
+	}()
+
+	go func() {
+		defer close(chLines)
+		chLines <- CountLines(linesReader)
+	}()
+
+	io.Copy(w, r)
+	bytesWriter.Close()
+	wordsWriter.Close()
+	linesWriter.Close()
+
+	bytesCount := <-chBytes
+	wordsCount := <-chWords
+	linesCount := <-chLines
+
+	return Counts{
+		bytes: bytesCount,
+		words: wordsCount,
+		lines: linesCount,
+	}
+}
+
+func GetCountsPipe(r io.Reader) Counts {
+
+	p1r, p1w := io.Pipe()
+	p2r, p2w := io.Pipe()
+
+	bytesReader := io.TeeReader(r, p1w)
+	wordsReader := io.TeeReader(p1r, p2w)
+	linesReader := p2r
+
+	chBytes := make(chan int)
+	chWords := make(chan int)
+	chLines := make(chan int)
+
+	go func() {
+		defer p1w.Close()
+		defer close(chBytes)
+		chBytes <- CountBytes(bytesReader)
+
+	}()
+
+	go func() {
+		defer p2w.Close()
+		defer close(chWords)
+		chWords <- CountWords(wordsReader)
+	}()
+
+	go func() {
+		defer close(chLines)
+		chLines <- CountLines(linesReader)
+	}()
+
+	bytesCount := <-chBytes
+	wordsCount := <-chWords
+	linesCount := <-chLines
+
+	return Counts{
+		bytes: bytesCount,
+		words: wordsCount,
+		lines: linesCount,
+	}
+}
+
+func GetCountsTeeReader(r io.Reader) Counts {
+	byteBuf := &bytes.Buffer{}
+	wordBuf := &bytes.Buffer{}
+
+	bytesReader := io.TeeReader(r, byteBuf)
+	wordsReader := io.TeeReader(byteBuf, wordBuf)
+	lineReader := wordBuf
+
+	byteCount := CountBytes(bytesReader)
+	wordCount := CountWords(wordsReader)
+	lineCount := CountLines(lineReader)
+
+	return Counts{
+		bytes: byteCount,
+		words: wordCount,
+		lines: lineCount,
+	}
+}
+
+func GetCountsSinglePass(f io.Reader) Counts {
 	//const offsetStart = 0
 	//lines := CountLines(f)
 	//f.Seek(offsetStart, io.SeekStart)
