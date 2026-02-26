@@ -111,7 +111,7 @@ func CountFiles(filenames []string) <-chan FileCountsResult {
 	return ch
 }
 
-func GetCounts(r io.Reader) Counts {
+func GetCountsMultiWriter(r io.Reader) Counts {
 	bytesReader, bytesWriter := io.Pipe()
 	wordsReader, wordsWriter := io.Pipe()
 	linesReader, linesWriter := io.Pipe()
@@ -215,6 +215,52 @@ func GetCountsTeeReader(r io.Reader) Counts {
 }
 
 func GetCountsSinglePass(f io.Reader) Counts {
+	//const offsetStart = 0
+	//lines := CountLines(f)
+	//f.Seek(offsetStart, io.SeekStart)
+	//
+	//words := CountWords(f)
+	//f.Seek(offsetStart, io.SeekStart)
+	//
+	//bytes := CountBytes(f)
+	//f.Seek(offsetStart, io.SeekStart)
+	//
+	//return Counts{
+	//	lines: lines,
+	//	words: words,
+	//	bytes: bytes,
+	//}
+
+	res := Counts{}
+
+	isInsideWord := false
+
+	reader := bufio.NewReader(f)
+
+	for {
+		r, size, err := reader.ReadRune()
+		if err != nil {
+			break
+		}
+		res.bytes += size
+
+		if r == '\n' {
+			res.lines++
+		}
+
+		isSpace := unicode.IsSpace(r)
+
+		if !isSpace && !isInsideWord {
+			res.words++
+		}
+
+		isInsideWord = !isSpace
+	}
+
+	return res
+}
+
+func GetCounts(f io.Reader) Counts {
 	//const offsetStart = 0
 	//lines := CountLines(f)
 	//f.Seek(offsetStart, io.SeekStart)

@@ -32,7 +32,22 @@ func main() {
 
 	ch := counter.CountFiles(filenames)
 
+	results := make([]counter.FileCountsResult, len(filenames))
+	filenameIndex := make(map[string]int, len(filenames))
+
+	for i, filename := range filenames {
+		filenameIndex[filename] = i
+	}
+
 	for res := range ch {
+		index, ok := filenameIndex[res.Filename]
+		if !ok {
+			continue
+		}
+		results[index] = res
+	}
+
+	for _, res := range results {
 		if res.Err != nil {
 			didError = true
 			fmt.Fprintln(os.Stderr, "counter:", res.Err)
@@ -44,7 +59,7 @@ func main() {
 	}
 
 	if len(filenames) > 1 {
-		totals.Print(wr, opts, "total")
+		totals.Print(wr, opts, "totals")
 	}
 
 	if len(filenames) == 0 {
